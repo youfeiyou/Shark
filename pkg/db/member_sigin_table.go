@@ -9,6 +9,7 @@ import (
 
 const (
 	MemberSigTable = "MemberSigTable"
+	RedisAddr      = "39.108.64.37:6379"
 )
 
 func UpdateMemberSig(info *pb.MemberSigInfo) error {
@@ -17,7 +18,7 @@ func UpdateMemberSig(info *pb.MemberSigInfo) error {
 		log.Fatalf("UpdateMemberSigInfo Marshal error :%v", err)
 		return err
 	}
-	cli := NewRedisClient("127.0.0.1:6379")
+	cli := NewRedisClient(RedisAddr)
 	err = cli.Hmset(MemberSigTable, map[string]interface{}{
 		strconv.FormatUint(info.GetUin(), 10): buf,
 	})
@@ -29,12 +30,15 @@ func UpdateMemberSig(info *pb.MemberSigInfo) error {
 }
 
 func GetMemberSig(uin uint64) (*pb.MemberSigInfo, error) {
-	cli := NewRedisClient("127.0.0.1:6379")
+	cli := NewRedisClient(RedisAddr)
 	uinstr := strconv.FormatUint(uin, 10)
 	info, err := cli.Hmget(MemberSigTable, uinstr)
 	if err != nil {
 		log.Fatalf("GetMemberSig read db error :%v", err)
 		return nil, err
+	}
+	if _, ok := info[uinstr]; !ok {
+		return nil, nil
 	}
 	ms := &pb.MemberSigInfo{}
 	if err := proto.Unmarshal([]byte(info[uinstr]), ms); err != nil {

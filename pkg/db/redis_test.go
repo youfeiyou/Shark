@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	addr = "127.0.0.1:6379"
+	addr = "39.108.64.37:6379"
 )
 
 func TestNewRedisClient(t *testing.T) {

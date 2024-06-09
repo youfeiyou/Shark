@@ -10,6 +10,7 @@ service SigService {
   rpc SigIn (SigReq) returns (Response);
   rpc SigOut (CheckReq) returns (Response);
   rpc Check (CheckReq) returns (Response);
+  rpc Register(SigReq) returns (Response);
 }
 
 message SigReq{

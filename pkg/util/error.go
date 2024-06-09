@@ -1,8 +1,16 @@
 package util
 
 const (
-	Success              = 0
-	GetMemberSigInfoFail = 1000
-	InvalidPassword      = 1001
-	UpdateMemberSigInfo  = 1002
+	Success = 0
+
+	// common error code 1000~1999
+
+	InvalidParms = 1000
+
+	//  sso service err code
+
+	GetMemberSigInfoFail = 2000
+	InvalidPassword      = 2001
+	UpdateMemberSigInfo  = 2002
+	UinAlreadyExists     = 2003
 )
