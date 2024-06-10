@@ -19,7 +19,7 @@ func UpdateMemberSig(info *pb.MemberSigInfo) error {
 		return err
 	}
 	cli := NewRedisClient(RedisAddr)
-	err = cli.Hmset(MemberSigTable, map[string]interface{}{
+	err = cli.HMSet(MemberSigTable, map[string]interface{}{
 		strconv.FormatUint(info.GetUin(), 10): buf,
 	})
 	if err != nil {
@@ -32,7 +32,7 @@ func UpdateMemberSig(info *pb.MemberSigInfo) error {
 func GetMemberSig(uin uint64) (*pb.MemberSigInfo, error) {
 	cli := NewRedisClient(RedisAddr)
 	uinstr := strconv.FormatUint(uin, 10)
-	info, err := cli.Hmget(MemberSigTable, uinstr)
+	info, err := cli.HMGet(MemberSigTable, uinstr)
 	if err != nil {
 		log.Fatalf("GetMemberSig read db error :%v", err)
 		return nil, err

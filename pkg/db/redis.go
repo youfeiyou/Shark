@@ -18,19 +18,38 @@ func NewRedisClient(addr string) *redisClinet {
 	}
 }
 
-func (c *redisClinet) Hmset(key string, fields map[string]interface{}) error {
+func (c *redisClinet) HMSet(key string, fields map[string]interface{}) error {
 	return c.cli.HMSet(key, fields).Err()
 }
 
-func (c *redisClinet) Hmget(key string, fields ...string) (map[string]string, error) {
+func (c *redisClinet) HMGet(key string, fields ...string) (map[string]string, error) {
 	ans, err := c.cli.HMGet(key, fields...).Result()
 	if err != nil {
 		log.Fatalf("redis hmset error: %v", err)
 		return nil, errors.New(err.Error())
+	}
+	if len(ans) == 0 {
+		return nil, nil
 	}
 	res := make(map[string]string, len(fields))
 	for i := 0; i < len(fields); i++ {
 		res[fields[i]] = ans[i].(string)
 	}
 	return res, nil
+}
+
+func (c *redisClinet) HIncrBy(key, field string, incr int64) error {
+	if err := c.cli.HIncrBy(key, field, incr); err != nil {
+		log.Printf("reids api Hincrby fail: %+v", err)
+		return err.Err()
+	}
+	return nil
+}
+
+func (c *redisClinet) Eval(script string, keys []string, argv ...interface{}) error {
+	if err := c.cli.Eval(script, keys, argv); err != nil {
+		log.Printf("reids api Hincrby fail: %+v", err)
+		return err.Err()
+	}
+	return nil
 }
