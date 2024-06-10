@@ -18,4 +18,17 @@ func main() {
 	}
 	rsp, err := cc.Register(context.Background(), req)
 	log.Printf("rsp: %v, err: %v", rsp, err)
+	rsp, err = cc.SigIn(context.Background(), req)
+	log.Printf("rsp %v,err %v", rsp, err)
+
+	checkReq := &pb.CheckReq{
+		Uin:   884322372,
+		Token: rsp.GetToken(),
+		Token: rsp.GetToken(),
+	}
+	rsp, err = cc.Check(context.Background(), checkReq)
+	log.Printf("Check rsp %v,err %v", rsp.Code, err)
+
+	rsp, err = cc.SigOut(context.Background(), checkReq)
+	log.Printf("rsp %v,err %v", rsp, err)
 }

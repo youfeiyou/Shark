@@ -33,7 +33,11 @@ func (c *redisClinet) HMGet(key string, fields ...string) (map[string]string, er
 	}
 	res := make(map[string]string, len(fields))
 	for i := 0; i < len(fields); i++ {
-		res[fields[i]] = ans[i].(string)
+		ok := false
+		res[fields[i]], ok = ans[i].(string)
+		if !ok {
+			log.Printf("no value %+v:%+v", key, fields[i])
+		}
 	}
 	return res, nil
 }

@@ -70,8 +70,8 @@ func Test_redisClinet_Hmget(t *testing.T) {
 				"1": []byte("123"),
 				"2": []byte("456"),
 			}
-			c.Hmset("test_key", kv)
-			got, err := c.Hmget(tt.args.key, tt.args.fields...)
+			c.HMSet("test_key", kv)
+			got, err := c.HMGet(tt.args.key, tt.args.fields...)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("Hmget() error = %v, wantErr %v", err, tt.wantErr)
 				return

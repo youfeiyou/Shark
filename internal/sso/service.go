@@ -57,9 +57,9 @@ func (s *Server) SigOut(ctx context.Context, req *pb.CheckReq) (*pb.Response, er
 		log.Printf("GetMemberSig fail: %+v", req.GetUin())
 		return nil, errors.New("request db fail")
 	}
-	if memberInfo != nil && memberInfo.GetUin() == req.GetUin() {
-		log.Printf("uin already exists: %+v", req.GetUin())
-		return &pb.Response{Code: util.UinAlreadyExists, Result: []byte("uin already exists")}, nil
+	if memberInfo == nil {
+		log.Printf("parms error: %+v", req.GetUin())
+		return &pb.Response{Code: util.InvalidParms, Result: []byte("parms error")}, nil
 	}
 	memberInfo.Token = []byte{}
 	memberInfo.ExpiredTime = 0
@@ -105,8 +105,9 @@ func (s *Server) Register(ctx context.Context, req *pb.SigReq) (*pb.Response, er
 	}
 	info := &pb.MemberSigInfo{
 		Uin:      req.GetUin(),
-		Password: req.GetPassword(),
+		Password: util.Md5(req.GetPassword()),
 	}
+	log.Printf("info: %+v", info)
 	if err := db.UpdateMemberSig(info); err != nil {
 		log.Printf("update db fail: %+v", err)
 		return nil, errors.New("update db fail")
