@@ -13,4 +13,6 @@ const (
 	InvalidPassword      = 2001
 	UpdateMemberSigInfo  = 2002
 	UinAlreadyExists     = 2003
+	InvalidToken         = 2004
+	ExpiredToken         = 2005
 )
