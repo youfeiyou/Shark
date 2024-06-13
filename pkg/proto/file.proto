@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+option go_package = "shark/pkg/proto";
+
+package pb;
+
+service SigService {
+  rpc UpLoad (Req) returns (Rsp);
+  rpc Download (Req) returns (Rsp);
+}
+
+enum ReqType{
+  INVALID_REQ = 0;
+  UPLOAD_REQ= 1;
+  DOWNLOAD_REQ = 2;
+}
+enum ResourceType{
+  INVALID = 0;
+  IMAGE = 1;
+  PERSONAL_FILE = 2;
+  GROUP_FILE =3;
+}
+message  Req{
+   uint64 uin              = 1;
+   uint64 group_id         = 2 ;
+   ReqType  req_type       = 3 ;
+   ResourceType res_type   = 4;
+}
+
+message Rsp{
+   string result  = 1;
+}

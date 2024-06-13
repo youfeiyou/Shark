@@ -24,7 +24,6 @@ func main() {
 	checkReq := &pb.CheckReq{
 		Uin:   884322372,
 		Token: rsp.GetToken(),
-		Token: rsp.GetToken(),
 	}
 	rsp, err = cc.Check(context.Background(), checkReq)
 	log.Printf("Check rsp %v,err %v", rsp.Code, err)
