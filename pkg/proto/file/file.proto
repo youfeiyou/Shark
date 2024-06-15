@@ -1,7 +1,7 @@
 syntax = "proto3";
 
-option go_package = "shark/pkg/proto";
-
+option go_package = "shark/pkg/proto/file";
+// protoc --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative file.proto
 package pb;
 
 service SigService {
@@ -9,22 +9,18 @@ service SigService {
   rpc Download (Req) returns (Rsp);
 }
 
-enum ReqType{
-  INVALID_REQ = 0;
-  UPLOAD_REQ= 1;
-  DOWNLOAD_REQ = 2;
-}
 enum ResourceType{
   INVALID = 0;
   IMAGE = 1;
   PERSONAL_FILE = 2;
   GROUP_FILE =3;
 }
+
 message  Req{
    uint64 uin              = 1;
-   uint64 group_id         = 2 ;
-   ReqType  req_type       = 3 ;
+   uint64 group_id         = 2;
    ResourceType res_type   = 4;
+   uint32 file_id          = 5;
 }
 
 message Rsp{

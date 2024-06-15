@@ -82,7 +82,7 @@ type CallbackParam struct {
 	CallbackBodyType string `json:"callbackBodyType"`
 }
 
-func get_policy_token(dir string) string {
+func getPolicyToken(dir string) (string, error) {
 	expireEnd := time.Now().Unix() + expireTime
 	var tokenExpire = getGmtIso8601(expireEnd)
 	//create post policy json
@@ -96,6 +96,9 @@ func get_policy_token(dir string) string {
 
 	//calucate signature
 	result, err := json.Marshal(config)
+	if err != nil {
+		return "", nil
+	}
 	debyte := base64.StdEncoding.EncodeToString(result)
 	h := hmac.New(func() hash.Hash { return sha1.New() }, []byte(ossAccessKeySecret))
 	io.WriteString(h, debyte)
@@ -121,6 +124,7 @@ func get_policy_token(dir string) string {
 	response, err := json.Marshal(policyToken)
 	if err != nil {
 		fmt.Println("json err:", err)
+		return "", err
 	}
-	return string(response)
+	return string(response), nil
 }
