@@ -1,0 +1,19 @@
+
+// 成员表
+create table memberinfo
+(
+    uin bigint not NULL,
+    member_id varchar(10) not NULL,
+    password varchar(16) not NULL,
+    name varchar(10),
+    profile varchar(16),
+    signature varchar(32),
+    email varchar(32),
+    phone bigint,
+    message_notify TINYINT DEFAULT 1,
+    create_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+    last_modify_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+    is_deleted TINYINT not null default 0,
+    PRIMARY KEY(uin),
+    UNIQUE INDEX member_id_idx(member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
