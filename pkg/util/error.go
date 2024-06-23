@@ -15,4 +15,6 @@ const (
 	UinAlreadyExists     = 2003
 	InvalidToken         = 2004
 	ExpiredToken         = 2005
+
+	// member service
 )

@@ -2,9 +2,9 @@
 // 成员表
 create table memberinfo
 (
-    uin bigint not NULL,
+    uin bigint UNSIGNED not NULL,
     member_id varchar(10) not NULL,
-    password varchar(16) not NULL,
+    password varbinary(16) not NULL,
     name varchar(10),
     profile varchar(16),
     signature varchar(32),
@@ -16,4 +16,13 @@ create table memberinfo
     is_deleted TINYINT not null default 0,
     PRIMARY KEY(uin),
     UNIQUE INDEX member_id_idx(member_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+// 成员ID表,保存到member_id到uin的映射关系,以member_id为主键
+create table member_ids
+(
+    uin bigint UNSIGNED not NULL,
+    member_id varchar(10) not NULL,
+    PRIMARY KEY(member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

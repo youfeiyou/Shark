@@ -40,6 +40,8 @@ type MemberDB interface {
 	UpdateMemberName(uint64, string) error
 	GetMemberInfo([]uint64) ([]Member, error)
 	UpdateMemberPass(id uint64, pass []byte) error
+	UpdateMembersInfo(*Member) error
+	UpdateMemberFields(*Member, map[string]interface{}) error
 }
 
 // MemberTable mysql 存储
@@ -105,4 +107,22 @@ func (m *MemberTable) GetMemberInfo(idx []uint64) ([]*Member, error) {
 		return nil, result.Error
 	}
 	return info, nil
+}
+
+func (m *MemberTable) updateMembersInfo(member *Member) error {
+	result := m.db.Save(member)
+	if result.Error != nil {
+		log.Printf("updateMembersInfo fail %+v", result)
+		return result.Error
+	}
+	return nil
+}
+
+func (m *MemberTable) UpdateMemberFields(member *Member) error {
+	result := m.db.Model(member).Updates(member)
+	if result.Error != nil {
+		log.Printf("updateMemberFields fail %+v", result)
+		return result.Error
+	}
+	return nil
 }

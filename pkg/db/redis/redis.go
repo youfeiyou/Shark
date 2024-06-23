@@ -13,7 +13,8 @@ type redisClinet struct {
 func NewRedisClient(addr string) *redisClinet {
 	return &redisClinet{
 		redis.NewClient(&redis.Options{
-			Addr: addr,
+			Addr:     addr,
+			Password: "shark",
 		}),
 	}
 }
@@ -56,4 +57,13 @@ func (c *redisClinet) Eval(script string, keys []string, argv ...interface{}) er
 		return err.Err()
 	}
 	return nil
+}
+
+func (c *redisClinet) Incr(key string) (uint64, error) {
+	var cmd *redis.IntCmd
+	if cmd = c.cli.Incr(key); cmd.Err() != nil {
+		log.Printf("reids api Incr fail: %+v", cmd.Err())
+		return 0, cmd.Err()
+	}
+	return uint64(cmd.Val()), nil
 }
