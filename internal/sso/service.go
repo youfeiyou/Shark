@@ -5,7 +5,9 @@ import (
 	"context"
 	"github.com/pkg/errors"
 	"log"
-	"shark/pkg/db"
+	db "shark/pkg/db/redis"
+	"shark/pkg/rpc"
+
 	pb "shark/pkg/proto"
 	"shark/pkg/util"
 	"time"
@@ -14,8 +16,6 @@ import (
 const (
 	TokenLength    = 16
 	TokenLimitTime = 7 * 24 * time.Hour
-	MinUin         = 1000
-	MinPasswordLen = 6
 )
 
 type Server struct {
@@ -25,28 +25,35 @@ type Server struct {
 func (s *Server) SigIn(ctx context.Context, req *pb.SigReq) (*pb.Response, error) {
 	log.Printf("SigIn, req: %v %v", req.GetUin(), req.GetDeviceId())
 	rsp := &pb.Response{}
-	info, err := db.GetMemberSig(req.GetUin())
+	memberinfo, err := rpc.GetMemberInfo(ctx, req.GetUin())
+	if err != nil {
+		log.Printf("get member info fail %v", err)
+		return rsp, nil
+	}
 	if err != nil {
 		log.Printf("et Member  info fail: %+v", err)
 		rsp.Code = util.GetMemberSigInfoFail
 		rsp.Result = []byte("get member sig info fail")
 		return rsp, nil
 	}
-	if !bytes.Equal(info.GetPassword(), util.Md5(req.GetPassword())) {
+	if !bytes.Equal(memberinfo.GetPassword(), util.Md5(req.GetPassword())) {
 		log.Printf("invalid password")
 		rsp.Code = util.InvalidPassword
 		rsp.Result = []byte("invalid password")
 		return rsp, nil
 	}
-	info.Token = util.RandString(TokenLength)
-	info.ExpiredTime = uint64(time.Now().Add(TokenLimitTime).Unix())
-	if err := db.UpdateMemberSig(info); err != nil {
+	siginfo := &pb.MemberSigInfo{
+		Token:       util.RandString(TokenLength),
+		ExpiredTime: uint64(time.Now().Add(TokenLimitTime).Unix()),
+		DeviceId:    req.GetDeviceId(),
+	}
+	if err := db.UpdateMemberSig(siginfo); err != nil {
 		log.Printf("update Member  info fail: %+v", err)
 		return nil, err
 	}
 	rsp.Code = util.Success
 	rsp.Result = []byte("success")
-	rsp.Token = info.GetToken()
+	rsp.Token = siginfo.GetToken()
 	return rsp, nil
 }
 
@@ -84,33 +91,6 @@ func (s *Server) Check(ctx context.Context, req *pb.CheckReq) (*pb.Response, err
 	if memberInfo.GetExpiredTime() <= uint64(time.Now().Unix()) {
 		log.Printf("expired token: %+v", req.GetUin())
 		return &pb.Response{Code: util.ExpiredToken}, nil
-	}
-	return &pb.Response{Code: util.Success}, nil
-}
-
-func (s *Server) Register(ctx context.Context, req *pb.SigReq) (*pb.Response, error) {
-	log.Printf("Register req: %+v", req)
-	if req.GetUin() < MinUin || len(req.GetPassword()) < MinPasswordLen {
-		log.Printf("invalid uin num,%v", req.GetUin())
-		return &pb.Response{Code: util.InvalidParms, Result: []byte("invalid parms")}, nil
-	}
-	memberInfo, err := db.GetMemberSig(req.GetUin())
-	if err != nil {
-		log.Printf("GetMemberSig fail: %+v", req.GetUin())
-		return nil, errors.New("request db fail")
-	}
-	if memberInfo != nil && memberInfo.GetUin() == req.GetUin() {
-		log.Printf("uin already exists: %+v", req.GetUin())
-		return &pb.Response{Code: util.UinAlreadyExists, Result: []byte("uin already exists")}, nil
-	}
-	info := &pb.MemberSigInfo{
-		Uin:      req.GetUin(),
-		Password: util.Md5(req.GetPassword()),
-	}
-	log.Printf("info: %+v", info)
-	if err := db.UpdateMemberSig(info); err != nil {
-		log.Printf("update db fail: %+v", err)
-		return nil, errors.New("update db fail")
 	}
 	return &pb.Response{Code: util.Success}, nil
 }

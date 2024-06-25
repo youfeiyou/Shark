@@ -26,3 +26,14 @@ create table member_ids
     member_id varchar(10) not NULL,
     PRIMARY KEY(member_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+create table relationship
+(
+   uin bigint UNSIGNED not NULL,
+   friend_uin bigint UNSIGNED not NULL,
+   is_black tinyint default 0,
+   create_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP(),
+   last_modify_time datetime NOT NULL DEFAULT CURRENT_TIMESTAMP() ON UPDATE CURRENT_TIMESTAMP(),
+   INDEX uin_idx(uin),
+   INDEX friend_idx(friend_uin)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;

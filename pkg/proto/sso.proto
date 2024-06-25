@@ -10,7 +10,6 @@ service SigService {
   rpc SigIn (SigReq) returns (Response);
   rpc SigOut (CheckReq) returns (Response);
   rpc Check (CheckReq) returns (Response);
-  rpc Register(SigReq) returns (Response);
 }
 
 message SigReq{
@@ -30,9 +29,8 @@ message Response{
      bytes   token         = 3;
 }
 message MemberSigInfo{
-  uint64 uin            = 1;
-  bytes  password        = 2;
-  bytes  token           = 3;
-  uint64 expired_time   = 4;
-  bytes   device_id     = 5;
+  uint64 uin             = 1;
+  bytes  token           = 2;
+  uint64 expired_time    = 3;
+  bytes   device_id      = 4;
 }

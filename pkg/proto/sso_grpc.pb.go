@@ -25,7 +25,6 @@ type SigServiceClient interface {
 	SigIn(ctx context.Context, in *SigReq, opts ...grpc.CallOption) (*Response, error)
 	SigOut(ctx context.Context, in *CheckReq, opts ...grpc.CallOption) (*Response, error)
 	Check(ctx context.Context, in *CheckReq, opts ...grpc.CallOption) (*Response, error)
-	Register(ctx context.Context, in *SigReq, opts ...grpc.CallOption) (*Response, error)
 }
 
 type sigServiceClient struct {
@@ -63,15 +62,6 @@ func (c *sigServiceClient) Check(ctx context.Context, in *CheckReq, opts ...grpc
 	return out, nil
 }
 
-func (c *sigServiceClient) Register(ctx context.Context, in *SigReq, opts ...grpc.CallOption) (*Response, error) {
-	out := new(Response)
-	err := c.cc.Invoke(ctx, "/pb.SigService/Register", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
 // SigServiceServer is the server API for SigService service.
 // All implementations must embed UnimplementedSigServiceServer
 // for forward compatibility
@@ -79,7 +69,6 @@ type SigServiceServer interface {
 	SigIn(context.Context, *SigReq) (*Response, error)
 	SigOut(context.Context, *CheckReq) (*Response, error)
 	Check(context.Context, *CheckReq) (*Response, error)
-	Register(context.Context, *SigReq) (*Response, error)
 	mustEmbedUnimplementedSigServiceServer()
 }
 
@@ -95,9 +84,6 @@ func (UnimplementedSigServiceServer) SigOut(context.Context, *CheckReq) (*Respon
 }
 func (UnimplementedSigServiceServer) Check(context.Context, *CheckReq) (*Response, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Check not implemented")
-}
-func (UnimplementedSigServiceServer) Register(context.Context, *SigReq) (*Response, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedSigServiceServer) mustEmbedUnimplementedSigServiceServer() {}
 
@@ -166,24 +152,6 @@ func _SigService_Check_Handler(srv interface{}, ctx context.Context, dec func(in
 	return interceptor(ctx, in, info, handler)
 }
 
-func _SigService_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SigReq)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(SigServiceServer).Register(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/pb.SigService/Register",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SigServiceServer).Register(ctx, req.(*SigReq))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
 // SigService_ServiceDesc is the grpc.ServiceDesc for SigService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -202,10 +170,6 @@ var SigService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "Check",
 			Handler:    _SigService_Check_Handler,
-		},
-		{
-			MethodName: "Register",
-			Handler:    _SigService_Register_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

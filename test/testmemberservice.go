@@ -32,4 +32,3 @@ func main() {
 	rsp, err := cc.Register(context.Background(), req)
 	log.Printf("Register rsp %v err %v", rsp, err)
 }
-git
