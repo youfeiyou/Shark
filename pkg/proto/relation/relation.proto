@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+option go_package = "shark/pkg/proto/relation";
+
+package relation;
+
+// protoc --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative .\relationship.proto
+
+service RelationService {
+  rpc GetAllFriends(Req)returns(Rsp);
+  rpc UpdateFriend(Req)returns(Rsp);
+  rpc CheckFriend (Req)returns(Rsp);
+}
+
+enum ReqType{
+    INVALID_TYPE =0;
+    GET_TYPE = 1;
+    DELETE_TYPE =2;
+    BLACK_TYPE = 3;
+    ADD_TYPE = 4;
+    CHECK_TYPE = 5;
+}
+enum Status{
+  INVALID_Status =0;
+  FRIEND = 1;
+  DELETE = 2;
+  BLACK  = 3;
+}
+message  Req {
+   uint64 uin =1;
+   uint64 friend_uin = 2;
+   ReqType type = 3;
+}
+
+message Relation{
+  uint64 uin   = 1;
+  Status status = 2;
+}
+
+message  Rsp{
+   repeated relation.Relation info = 1;
+}

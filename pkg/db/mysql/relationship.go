@@ -11,7 +11,7 @@ import (
 type Relationship struct {
 	Uin            uint64    `gorm:";column:uin;"`
 	FriendUin      uint64    `gorm:";column:friend_uin;"`
-	IsBlack        uint8     `gorm:";column:is_black;"`
+	Status         uint8     `gorm:";column:status;"`
 	CreateTime     time.Time `gorm:"column:create_time;"`
 	LastUpdateTime time.Time `gorm:"column:last_modify_time;"`
 }
@@ -81,6 +81,7 @@ func (m *RelationshipTable) GetAllFriends(uin uint64) ([]*Relationship, error) {
 		log.Printf("RelationshipTable GetAllFriends fail: %v", result.Error)
 		return nil, nil
 	}
+	log.Printf("result %+v", result)
 	return r, nil
 }
 
@@ -90,5 +91,6 @@ func (m *RelationshipTable) Update(relationship *Relationship) error {
 		log.Printf("RelationshipTable Update fail: %v", result.Error)
 		return result.Error
 	}
+	log.Printf("result %+v", result)
 	return nil
 }

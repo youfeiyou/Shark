@@ -39,9 +39,7 @@ func ConvertToDB(member *pb.Member, filter *pb.MemberFilter) *db.Member {
 
 func ConvertToPb(dbmember *db.Member, filter *pb.MemberFilter) *pb.Member {
 	member := &pb.Member{}
-	if filter.GetUin() != 0 {
-		member.Uin = dbmember.Uin
-	}
+	member.Uin = dbmember.Uin
 	if filter.GetMemberId() != 0 {
 		member.MemberId = dbmember.MemberID
 	}

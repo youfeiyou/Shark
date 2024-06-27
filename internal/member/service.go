@@ -70,10 +70,10 @@ func (*Server) GetMember(ctx context.Context, req *pb.Req) (*pb.Rsp, error) {
 		log.Printf("Register GetMemberInfo fail")
 		return rsp, nil
 	}
-	members := make([]*pb.Member, len(uins))
 	req.Filter.Password = 0
 	for _, v := range dbmembers {
-		members = append(members, ConvertToPb(v, req.GetFilter()))
+		log.Printf("members :%+v", v)
+		rsp.Member = append(rsp.Member, ConvertToPb(v, req.GetFilter()))
 	}
 	return rsp, nil
 }
