@@ -27,7 +27,7 @@ message PushReq{
   repeated Message push_messages = 1;
 }
 message PushRsp{
-
+ repeated uint64 failed_uin = 1;
 }
 
 message HeatBeat{
