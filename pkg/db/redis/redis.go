@@ -67,3 +67,12 @@ func (c *redisClinet) Incr(key string) (uint64, error) {
 	}
 	return uint64(cmd.Val()), nil
 }
+
+func (c *redisClinet) HDel(key string, fields ...string) error {
+	var cmd *redis.IntCmd
+	if cmd = c.cli.HDel(key, fields...); cmd.Err() != nil {
+		log.Printf("reids api HDel fail: %+v", cmd.Err())
+		return cmd.Err()
+	}
+	return nil
+}

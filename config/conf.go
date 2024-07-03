@@ -7,6 +7,8 @@ type Config struct {
 
 	MemberServiceAddr   string
 	RelationServicePort int16
+	ConnListenPort      int16
+	ConnServicePort     int16
 }
 
 var Conf Config
@@ -19,5 +21,8 @@ func init() {
 
 		MemberServiceAddr:   "127.0.0.1:16002",
 		RelationServicePort: 16003,
+
+		ConnListenPort:  16004,
+		ConnServicePort: 16005,
 	}
 }
