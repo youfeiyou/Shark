@@ -3,28 +3,14 @@ syntax = "proto3";
 option go_package = "shark/pkg/proto/conn";
 // protoc --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative conn.proto
 package conn;
-
-service SigService {
+import "msg.proto";
+service ConnService {
   rpc push (PushReq) returns (PushRsp);
 }
 
 
-enum MessageType{
-  INVALID_MSG_TYPE = 0;
-  PERSONAL_MESSAGE_TYPE = 1;
-  GROUP_MESSAGE_TYPE = 2;
-
-}
-
-message Message{
-  uint64 uin   = 1;
-  MessageType type = 2;
-  bytes content  = 3;
-  uint64 timestamp = 4;
-}
-
 message PushReq{
-  repeated Message push_messages = 1;
+  repeated msg.Message push_messages = 1;
 }
 message PushRsp{
  repeated uint64 failed_uin = 1;

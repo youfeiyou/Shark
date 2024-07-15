@@ -1,0 +1,46 @@
+syntax = "proto3";
+
+option go_package = "shark/pkg/proto/msg";
+// protoc --proto_path=../conn  -I. --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative msg.proto
+package msg;
+
+
+message Session{
+  SessionSeq  seq       = 1;
+  uint32 is_delete      = 100;
+}
+
+
+message AppFetchSeq{
+    uint64 ios_seq = 1;
+    uint64 and_seq = 2;
+    uint64 pc_seq  = 3;
+}
+
+message SessionMember{
+  uint64 msg_read_seq    = 1;
+  AppFetchSeq client_seq = 2;
+}
+
+message SessionSeq{
+  uint64 max_msg_seq    = 1;
+  uint64 max_msg_at_seq = 2;
+  uint64 packet_seq     = 3;
+}
+
+enum MessageType{
+  INVALID_MSG_TYPE = 0;
+  PERSONAL_MESSAGE_TYPE = 1;
+  GROUP_MESSAGE_TYPE = 2;
+
+}
+
+message Message{
+  uint64 uin         = 1;
+  MessageType type   = 2;
+  bytes content      = 3;
+  uint64 timestamp   = 4;
+  string session_id  = 5;
+
+  SessionSeq seq      = 100;
+}

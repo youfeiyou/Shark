@@ -18,86 +18,86 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// SigServiceClient is the client API for SigService service.
+// ConnServiceClient is the client API for ConnService service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type SigServiceClient interface {
+type ConnServiceClient interface {
 	Push(ctx context.Context, in *PushReq, opts ...grpc.CallOption) (*PushRsp, error)
 }
 
-type sigServiceClient struct {
+type connServiceClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewSigServiceClient(cc grpc.ClientConnInterface) SigServiceClient {
-	return &sigServiceClient{cc}
+func NewConnServiceClient(cc grpc.ClientConnInterface) ConnServiceClient {
+	return &connServiceClient{cc}
 }
 
-func (c *sigServiceClient) Push(ctx context.Context, in *PushReq, opts ...grpc.CallOption) (*PushRsp, error) {
+func (c *connServiceClient) Push(ctx context.Context, in *PushReq, opts ...grpc.CallOption) (*PushRsp, error) {
 	out := new(PushRsp)
-	err := c.cc.Invoke(ctx, "/conn.SigService/push", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/conn.ConnService/push", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// SigServiceServer is the server API for SigService service.
-// All implementations must embed UnimplementedSigServiceServer
+// ConnServiceServer is the server API for ConnService service.
+// All implementations must embed UnimplementedConnServiceServer
 // for forward compatibility
-type SigServiceServer interface {
+type ConnServiceServer interface {
 	Push(context.Context, *PushReq) (*PushRsp, error)
-	mustEmbedUnimplementedSigServiceServer()
+	mustEmbedUnimplementedConnServiceServer()
 }
 
-// UnimplementedSigServiceServer must be embedded to have forward compatible implementations.
-type UnimplementedSigServiceServer struct {
+// UnimplementedConnServiceServer must be embedded to have forward compatible implementations.
+type UnimplementedConnServiceServer struct {
 }
 
-func (UnimplementedSigServiceServer) Push(context.Context, *PushReq) (*PushRsp, error) {
+func (UnimplementedConnServiceServer) Push(context.Context, *PushReq) (*PushRsp, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Push not implemented")
 }
-func (UnimplementedSigServiceServer) mustEmbedUnimplementedSigServiceServer() {}
+func (UnimplementedConnServiceServer) mustEmbedUnimplementedConnServiceServer() {}
 
-// UnsafeSigServiceServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to SigServiceServer will
+// UnsafeConnServiceServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to ConnServiceServer will
 // result in compilation errors.
-type UnsafeSigServiceServer interface {
-	mustEmbedUnimplementedSigServiceServer()
+type UnsafeConnServiceServer interface {
+	mustEmbedUnimplementedConnServiceServer()
 }
 
-func RegisterSigServiceServer(s grpc.ServiceRegistrar, srv SigServiceServer) {
-	s.RegisterService(&SigService_ServiceDesc, srv)
+func RegisterConnServiceServer(s grpc.ServiceRegistrar, srv ConnServiceServer) {
+	s.RegisterService(&ConnService_ServiceDesc, srv)
 }
 
-func _SigService_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _ConnService_Push_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(PushReq)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(SigServiceServer).Push(ctx, in)
+		return srv.(ConnServiceServer).Push(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/conn.SigService/push",
+		FullMethod: "/conn.ConnService/push",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(SigServiceServer).Push(ctx, req.(*PushReq))
+		return srv.(ConnServiceServer).Push(ctx, req.(*PushReq))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// SigService_ServiceDesc is the grpc.ServiceDesc for SigService service.
+// ConnService_ServiceDesc is the grpc.ServiceDesc for ConnService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var SigService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "conn.SigService",
-	HandlerType: (*SigServiceServer)(nil),
+var ConnService_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "conn.ConnService",
+	HandlerType: (*ConnServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "push",
-			Handler:    _SigService_Push_Handler,
+			Handler:    _ConnService_Push_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
