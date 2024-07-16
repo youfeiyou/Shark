@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"google.golang.org/protobuf/proto"
 	"log"
+	"reflect"
 	"shark/pkg/proto/msg"
 	"strconv"
 )
 
 const (
 	msgdb           = "msgdb_"
+	msgseqdb        = "msgseqdb_"
 	sessiondb       = "sessiondb_"
 	sessionmemberdb = "sessionmemberdb_"
 )
@@ -58,8 +60,38 @@ func (msgDBAPI) AddMessage(ctx context.Context, sid string, message *msg.Message
 	return nil
 }
 
-func (msgSEQPAI) genSessionSeq(ctx context.Context, isAtMsg, isPacketMsg bool) (*msg.SessionSeq, error) {
+func (m msgDBAPI) GetGroupMessages(ctx context.Context, gid uint64, seq []uint64) (*msg.Message, error) {
+
+	return nil, nil
+}
+
+func (m msgDBAPI) GetPersonalMessages(ctx context.Context, sendid, rid uint64, seq []uint64) (*msg.Message, error) {
+
+	return nil, nil
+}
+
+func (msgSEQPAI) genSessionSeq(ctx context.Context, sid string, isAtMsg, isPacketMsg bool) (*msg.SessionSeq, error) {
 	seq := &msg.SessionSeq{}
+	cli := NewRedisClient(RedisAddr)
+	argv := []interface{}{"MaxMsgSeq"}
+	if isAtMsg {
+		argv = append(argv, "MaxMsgAtSeq")
+	}
+	if isPacketMsg {
+		argv = append(argv, "PacketSeq")
+	}
+	cmd := MsgSeqScript.Run(ctx, cli.cli, []string{sid}, argv...)
+	if cmd.Err() != nil {
+		return nil, cmd.Err()
+	}
+	s := cmd.Val().([]interface{})
+	ele := reflect.ValueOf(seq).Elem()
+	for i := 0; i < len(s); i += 2 {
+		k := s[i].(string)
+		v, _ := strconv.ParseUint(s[i+1].(string), 10, 64)
+		ele.FieldByName(k).SetUint(v)
+	}
+	log.Printf("success gen msg seq %+v", seq)
 	return seq, nil
 }
 

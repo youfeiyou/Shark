@@ -1,14 +1,27 @@
 package db
 
 import (
-	"github.com/go-redis/redis"
+	"context"
+	//"github.com/go-redis/redis"
 	"github.com/pkg/errors"
+	"github.com/redis/go-redis/v9"
 	"log"
 )
 
 type redisClinet struct {
 	cli *redis.Client
 }
+
+var MsgSeqScript = redis.NewScript(`
+   local num_arg = #ARGV
+   local res = {}
+   for i = 1, num_arg do
+      local v = redis.call("HINCRBY",KEYS[1], ARGV[i], 1)
+      res[#res+1] = v
+   end
+   return redis.call("HGETALL",KEYS[1])
+   
+`)
 
 func NewRedisClient(addr string) *redisClinet {
 	return &redisClinet{
@@ -20,11 +33,11 @@ func NewRedisClient(addr string) *redisClinet {
 }
 
 func (c *redisClinet) HMSet(key string, fields map[string]interface{}) error {
-	return c.cli.HMSet(key, fields).Err()
+	return c.cli.HMSet(context.Background(), key, fields).Err()
 }
 
 func (c *redisClinet) HMGet(key string, fields ...string) (map[string]string, error) {
-	ans, err := c.cli.HMGet(key, fields...).Result()
+	ans, err := c.cli.HMGet(context.Background(), key, fields...).Result()
 	if err != nil {
 		log.Fatalf("redis hmset error: %v", err)
 		return nil, errors.New(err.Error())
@@ -44,24 +57,26 @@ func (c *redisClinet) HMGet(key string, fields ...string) (map[string]string, er
 }
 
 func (c *redisClinet) HIncrBy(key, field string, incr int64) error {
-	if err := c.cli.HIncrBy(key, field, incr); err != nil {
-		log.Printf("reids api Hincrby fail: %+v", err)
-		return err.Err()
+	var cmd *redis.IntCmd
+	if cmd = c.cli.HIncrBy(context.Background(), key, field, incr); cmd.Err() != nil {
+		log.Printf("reids api Hincrby fail: %+v", cmd.Err())
+		return cmd.Err()
 	}
 	return nil
 }
 
-func (c *redisClinet) Eval(script string, keys []string, argv ...interface{}) error {
-	if err := c.cli.Eval(script, keys, argv); err != nil {
-		log.Printf("reids api Hincrby fail: %+v", err)
-		return err.Err()
+func (c *redisClinet) Eval(script string, keys []string, argv ...interface{}) (*redis.Cmd, error) {
+	var cmd *redis.Cmd
+	if cmd = c.cli.Eval(context.Background(), script, keys, argv); cmd.Err() != nil {
+		log.Printf("reids api Hincrby fail: %+v", cmd.Err())
+		return nil, cmd.Err()
 	}
-	return nil
+	return cmd, nil
 }
 
 func (c *redisClinet) Incr(key string) (uint64, error) {
 	var cmd *redis.IntCmd
-	if cmd = c.cli.Incr(key); cmd.Err() != nil {
+	if cmd = c.cli.Incr(context.Background(), key); cmd.Err() != nil {
 		log.Printf("reids api Incr fail: %+v", cmd.Err())
 		return 0, cmd.Err()
 	}
@@ -70,7 +85,7 @@ func (c *redisClinet) Incr(key string) (uint64, error) {
 
 func (c *redisClinet) HDel(key string, fields ...string) error {
 	var cmd *redis.IntCmd
-	if cmd = c.cli.HDel(key, fields...); cmd.Err() != nil {
+	if cmd = c.cli.HDel(context.Background(), key, fields...); cmd.Err() != nil {
 		log.Printf("reids api HDel fail: %+v", cmd.Err())
 		return cmd.Err()
 	}
