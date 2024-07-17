@@ -53,21 +53,43 @@ func (msgDBAPI) AddMessage(ctx context.Context, sid string, message *msg.Message
 	fields := map[string]interface{}{
 		id: data,
 	}
-	if err := cli.HMSet(sid, fields); err != nil {
+	if err := cli.HMSet(msgdb+sid, fields); err != nil {
 		log.Printf("cli.HMSet fail %v", err)
 		return err
 	}
 	return nil
 }
 
-func (m msgDBAPI) GetGroupMessages(ctx context.Context, gid uint64, seq []uint64) (*msg.Message, error) {
-
-	return nil, nil
+func (msgDBAPI) getMessages(ctx context.Context, sid string, seqs []uint64) ([]*msg.Message, error) {
+	cli := NewRedisClient(RedisAddr)
+	fields := make([]string, len(seqs))
+	for _, v := range seqs {
+		fields = append(fields, strconv.FormatUint(v, 10))
+	}
+	ret, err := cli.HMGet(sid, fields...)
+	if err != nil {
+		return nil, err
+	}
+	msgs := make([]*msg.Message, len(ret))
+	for _, v := range ret {
+		m := &msg.Message{}
+		if err := proto.Unmarshal([]byte(v), m); err != nil {
+			log.Printf("getMessages proto.Unmarshal fail %+v", err)
+			panic("proto.Unmarshal fail")
+		}
+		msgs = append(msgs, m)
+	}
+	return msgs, nil
 }
 
-func (m msgDBAPI) GetPersonalMessages(ctx context.Context, sendid, rid uint64, seq []uint64) (*msg.Message, error) {
+func (m msgDBAPI) GetGroupMessages(ctx context.Context, gid uint64, seqs []uint64) ([]*msg.Message, error) {
+	sid := genGroupSessionID(gid)
+	return m.getMessages(ctx, sid, seqs)
+}
 
-	return nil, nil
+func (m msgDBAPI) GetPersonalMessages(ctx context.Context, sendid, rid uint64, seqs []uint64) ([]*msg.Message, error) {
+	sid := genPersonalSessionID(sendid, rid)
+	return m.getMessages(ctx, sid, seqs)
 }
 
 func (msgSEQPAI) genSessionSeq(ctx context.Context, sid string, isAtMsg, isPacketMsg bool) (*msg.SessionSeq, error) {
@@ -80,7 +102,7 @@ func (msgSEQPAI) genSessionSeq(ctx context.Context, sid string, isAtMsg, isPacke
 	if isPacketMsg {
 		argv = append(argv, "PacketSeq")
 	}
-	cmd := MsgSeqScript.Run(ctx, cli.cli, []string{sid}, argv...)
+	cmd := MsgSeqScript.Run(ctx, cli.cli, []string{msgseqdb + sid}, argv...)
 	if cmd.Err() != nil {
 		return nil, cmd.Err()
 	}
@@ -105,4 +127,39 @@ func genPersonalSessionID(sid, rid uint64) string {
 
 func genGroupSessionID(gid uint64) string {
 	return fmt.Sprintf("g_%d", gid)
+}
+
+func (m sessionMemeberapi) UpdateSessionMember(ctx context.Context, sid string, uin uint64, member *msg.SessionMember) error {
+	cli := NewRedisClient(RedisAddr)
+	data, err := proto.Marshal(member)
+	if err != nil {
+		log.Printf("UpdateSessionMember fail %+v", err)
+		return err
+	}
+	fields := map[string]interface{}{
+		strconv.FormatUint(uin, 10): data,
+	}
+	if err := cli.HMSet(sessionmemberdb+sid, fields); err != nil {
+		log.Printf("cli.HMSet fail %+v", err)
+		return err
+	}
+	return nil
+}
+
+func (m sessionMemeberapi) GetSessionMember(ctx context.Context, sid string, uin uint64) (*msg.SessionMember, error) {
+	cli := NewRedisClient(RedisAddr)
+	su := strconv.FormatUint(uin, 10)
+	ret, err := cli.HMGet(sessionmemberdb+sid, su)
+	if err != nil {
+		log.Printf("cli.HMGet fail %+v", err)
+		return nil, err
+	}
+	if _, ok := ret[su]; !ok {
+		return nil, nil
+	}
+	member := &msg.SessionMember{}
+	if err := proto.Unmarshal([]byte(ret[su]), member); err != nil {
+		return nil, err
+	}
+	return member, nil
 }

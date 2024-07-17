@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+option go_package = "shark/pkg/proto/groupmember";
+// protoc --go_out=. --go_opt=paths=source_relative  --go-grpc_out=. --go-grpc_opt=paths=source_relative groupmember.proto
+package groupmember;
+
+message dbGroupMember{
+   uint64 group        =1;
+   uint64 uin         =  2;
+   string name        = 3;
+   string comments    = 4;
+   uint32 notify      = 5;
+   uint32 status      = 6;
+}
