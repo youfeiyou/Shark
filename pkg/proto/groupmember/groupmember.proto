@@ -12,3 +12,9 @@ message dbGroupMember{
    uint32 notify      = 5;
    uint32 status      = 6;
 }
+
+message meta{
+   uint64 member_num       = 1;
+   uint32 index            = 2;
+   uint32 table_num        = 3;
+}
