@@ -91,3 +91,10 @@ func (groupMemberAPI) UpdateGroupMember(ctx context.Context, group uint64, membe
 	log.Printf("UpdateGroupMember success %+v", member)
 	return nil
 }
+
+func (groupMemberAPI) GetAllGroupMember(ctx context.Context, group uint64) ([]*pb.DbGroupMember, error) {
+	cli := NewRedisClient(RedisAddr)
+	key := gmdb + strconv.FormatUint(group, 10)
+	cli.HMGet(key)
+	return nil, nil
+}

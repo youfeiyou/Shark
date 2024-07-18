@@ -91,3 +91,11 @@ func (c *redisClinet) HDel(key string, fields ...string) error {
 	}
 	return nil
 }
+
+func (c *redisClinet) HGetAll(ctx context.Context, key string) (map[string]string, error) {
+	ret := c.cli.HGetAll(ctx, key)
+	if ret.Err() != nil {
+		return nil, ret.Err()
+	}
+	return ret.Val(), nil
+}
