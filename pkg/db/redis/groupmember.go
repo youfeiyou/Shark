@@ -95,6 +95,26 @@ func (groupMemberAPI) UpdateGroupMember(ctx context.Context, group uint64, membe
 func (groupMemberAPI) GetAllGroupMember(ctx context.Context, group uint64) ([]*pb.DbGroupMember, error) {
 	cli := NewRedisClient(RedisAddr)
 	key := gmdb + strconv.FormatUint(group, 10)
-	cli.HMGet(key)
-	return nil, nil
+	ret, err := cli.HMGet(key)
+	if err != nil {
+		log.Printf("GetAllGroupMember fail %+v", err)
+		return nil, err
+	}
+	if len(ret) == 0 {
+		log.Printf("no uin info")
+		return nil, nil
+	}
+	ans := make([]*pb.DbGroupMember, len(ret))
+	for k, v := range ret {
+		if k == meta {
+			continue
+		}
+		m := &pb.DbGroupMember{}
+		if err := proto.Unmarshal([]byte(v), m); err != nil {
+			log.Printf("proto.Unmarshal fail %+v", err)
+			continue
+		}
+		ans = append(ans, m)
+	}
+	return ans, nil
 }
